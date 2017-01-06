@@ -504,6 +504,8 @@ void TextChannelListener::slotOnModelReady(bool status)
     const int groupCount = m_GroupModel->rowCount();
     if (groupCount > 0 && m_Account) {
         const Recipient recipient(m_Account->objectPath(), targetId());
+        // For telephony messaging, do not fallback to a multi-member group
+        const bool fallback(!recipient.localUid().startsWith(RING_ACCOUNT_PATH_PREFIX));
         int fallbackRow = -1;
         int row = 0;
         for ( ; row < groupCount; row++) {
@@ -513,7 +515,7 @@ void TextChannelListener::slotOnModelReady(bool status)
                 const CommHistory::RecipientList &recipients = group.recipients();
                 if (recipients.count() > 1) {
                     // This is a multi-member group; prefer to continue searching for an exact match
-                    if (fallbackRow == -1 && recipients.containsMatch(recipient)) {
+                    if (fallback && fallbackRow == -1 && recipients.containsMatch(recipient)) {
                         fallbackRow = row;
                     }
                 } else if (recipients.containsMatch(recipient)) {
@@ -524,7 +526,7 @@ void TextChannelListener::slotOnModelReady(bool status)
             }
         }
         if (row == groupCount) {
-            if (fallbackRow != -1) {
+            if (fallback && fallbackRow != -1) {
                 m_Group = m_GroupModel->group(m_GroupModel->index(fallbackRow, 0));
                 DEBUG() << Q_FUNC_INFO << "found existing multi-member group:" << m_Group.id();
             } else {
