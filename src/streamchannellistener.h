@@ -25,8 +25,10 @@
 
 #include <QDateTime>
 #include <QTimerEvent>
+#include <QScopedPointer>
 #include <TelepathyQt/Types>
 #include <time.h>
+#include <qofononetworkregistration.h>
 #include "channellistener.h"
 
 namespace CommHistory {
@@ -82,6 +84,7 @@ private:
     CommHistory::Event m_Event;
     bool m_EventAdded;
     int m_LoggingTimerId;
+    QScopedPointer<QOfonoNetworkRegistration> m_networkRegistration;
 
     bool m_eventCommitted;
     Tp::DBusProxy *m_pProxy;

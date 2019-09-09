@@ -22,6 +22,7 @@
 
 #include "streamchannellistener.h"
 #include "notificationmanager.h"
+#include "constants.h"
 #include "debug.h"
 
 // libcommhistory
@@ -66,8 +67,11 @@ StreamChannelListener::StreamChannelListener(const Tp::AccountPtr &account,
     m_Event.setStartTime(QDateTime::currentDateTime());
     m_Event.setEndTime(m_Event.startTime());
     m_Event.setType(CommHistory::Event::CallEvent);
-    if (m_Account)
+    if (m_Account) {
         m_Event.setLocalUid(m_Account->objectPath());
+    } else {
+        qWarning() << Q_FUNC_INFO << "Telepathy account ptr is not set";
+    }
     m_Event.setRecipients(Recipient(m_Event.localUid(), targetId()));
 
     m_Direction = CommHistory::Event::Inbound;
@@ -99,6 +103,15 @@ StreamChannelListener::StreamChannelListener(const Tp::AccountPtr &account,
     // postpone adding event for incoming event to speed up call handling
     if (m_Direction == CommHistory::Event::Outbound && !addEvent())
         qWarning() << Q_FUNC_INFO << "failed to add event";
+
+    if (m_Event.localUid().startsWith(RING_ACCOUNT_PATH_PREFIX)) {
+        QString modemPath = m_Event.localUid().mid(QString(RING_ACCOUNT_PATH_PREFIX).length());
+        qWarning() << Q_FUNC_INFO << "modem path is" << modemPath;
+        m_networkRegistration.reset(new QOfonoNetworkRegistration(this));
+        m_networkRegistration->setModemPath(modemPath);
+    } else {
+        qWarning() << Q_FUNC_INFO << "local uid" << m_Event.localUid() << "doesn't start with" << RING_ACCOUNT_PATH_PREFIX;
+    }
 }
 
 StreamChannelListener::~StreamChannelListener()
@@ -218,6 +231,14 @@ void StreamChannelListener::slotGroupMembersChanged(
     Tp::StreamedMediaChannelPtr mediaChannel = Tp::StreamedMediaChannelPtr::dynamicCast(m_Channel);
 
     if(!mediaChannel.isNull()) {
+        if (m_networkRegistration) {
+            if (!m_networkRegistration->isValid() || m_networkRegistration->status().isEmpty()) {
+                qWarning() << Q_FUNC_INFO << "network registration is invalid";
+            } else {
+                m_Event.setExtraProperty("regionCode", m_networkRegistration->country());
+            }
+        }
+
         if (!m_CallStarted) {
             // call not started, new member added, members > 1
             if (!groupMembersAdded.isEmpty() &&
