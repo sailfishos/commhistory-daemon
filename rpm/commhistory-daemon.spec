@@ -30,6 +30,7 @@ BuildRequires:  python
 Requires:  libcommhistory-qt5 >= 1.9.33
 Requires:  libqofono-qt5 >= 0.66
 Requires:  mapplauncherd-qt5
+Requires:  sailfish-setup >= 0.1.2
 
 Obsoletes: smshistory <= 0.1.8
 Provides: smshistory > 0.1.8
