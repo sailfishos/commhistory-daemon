@@ -23,7 +23,6 @@
 
 #include "personalnotification.h"
 #include "notificationmanager.h"
-#include "notificationgroup.h"
 #include "locstrings.h"
 #include "constants.h"
 #include "debug.h"
@@ -34,12 +33,54 @@
 using namespace RTComLogger;
 using namespace CommHistory;
 
+// events
+struct EventTypes {
+    int type;
+    const char* event;
+};
+
+static const EventTypes _eventTypes[] =
+{
+    {CommHistory::Event::IMEvent,       "x-nemo.messaging.im"},
+    {CommHistory::Event::SMSEvent,      "x-nemo.messaging.sms"},
+    {CommHistory::Event::MMSEvent,      "x-nemo.messaging.mms"},
+    {CommHistory::Event::CallEvent,     "x-nemo.call.missed"},
+    {CommHistory::Event::VoicemailEvent,"x-nemo.messaging.voicemail"},
+    {VOICEMAIL_SMS_EVENT_TYPE,          "x-nemo.messaging.voicemail-SMS"}
+};
+
+static const int _eventTypesCount = sizeof(_eventTypes) / sizeof(EventTypes);
+
+static QString groupType(int eventType)
+{
+    for (int i = 0; i < _eventTypesCount; i++) {
+        if (_eventTypes[i].type == eventType)
+            return QLatin1String(_eventTypes[i].event);
+    }
+    return QString();
+}
+
+static QString groupName(PersonalNotification::EventCollection collection)
+{
+    switch (collection) {
+        case PersonalNotification::Voicemail:
+            return txt_qtn_msg_voicemail_group;
+
+        case PersonalNotification::Voice:
+            return txt_qtn_msg_missed_calls_group;
+
+        case PersonalNotification::Messaging:
+            return txt_qtn_msg_notifications_group;
+    }
+
+    return QString();
+}
+
+
 PersonalNotification::PersonalNotification(QObject* parent) : QObject(parent),
     m_eventType(CommHistory::Event::UnknownType),
     m_chatType(CommHistory::Group::ChatTypeP2P),
     m_hasPendingEvents(false),
-    m_hidden(false),
-    m_restored(false),
     m_notification(0)
 {
 }
@@ -56,8 +97,6 @@ PersonalNotification::PersonalNotification(const QString& remoteUid,
     m_eventType(eventType), m_targetId(channelTargetId), m_chatType(chatType),
     m_notificationText(lastNotification),
     m_hasPendingEvents(true),
-    m_hidden(false),
-    m_restored(false),
     m_notification(0),
     m_recipient(account, remoteUid)
 {
@@ -91,7 +130,6 @@ bool PersonalNotification::restore(Notification *n)
 
     m_notification = n;
     m_recipient = Recipient(account(), remoteUid());
-    m_restored = true;
     connect(m_notification, SIGNAL(closed(uint)), SLOT(onClosed(uint)));
     return true;
 }
@@ -122,38 +160,25 @@ void PersonalNotification::publishNotification()
         m_notification->setTimestamp(QDateTime::currentDateTimeUtc());
     }
 
-    m_notification->setAppName(NotificationGroup::groupName(collection()));
-    m_notification->setCategory(NotificationGroup::groupType(m_eventType));
+    m_notification->setAppName(groupName(collection()));
+    m_notification->setCategory(groupType(m_eventType));
     m_notification->setHintValue("x-commhistoryd-data", serialized().toBase64());
-    m_notification->setHintValue("x-nemo-hidden", m_hidden);
     m_notification->setSummary(name);
     m_notification->setBody(notificationText());
+    m_notification->setIcon(m_recipient.contactAvatarUrl().toString());
 
     NotificationManager::instance()->setNotificationProperties(m_notification, this, false);
 
-    // Show preview banner for notifications not previously reported
-    // (missed calls have no preview as the incoming call dialog was just shown)
-    if ((collection() != Voice) && !m_hidden && m_notification->replacesId() == 0) {
-        Notification preview;
-
-        preview.setAppName(m_notification->appName());
-        preview.setCategory(m_notification->category() + QStringLiteral(".preview"));
-        preview.setPreviewSummary(m_notification->summary());
-        preview.setPreviewBody(m_notification->body());
-
-        NotificationManager::instance()->setNotificationProperties(&preview, this, false);
-
-        preview.publish();
-
-        DEBUG() << preview.replacesId() << preview.category() << preview.previewSummary() << preview.previewBody();
+    if (collection() == Voice) {
+        m_notification->clearPreviewSummary();
+        m_notification->clearPreviewBody();
     }
 
     m_notification->publish();
 
     setHasPendingEvents(false);
-    m_restored = false;
 
-    DEBUG() << m_notification->replacesId() << m_notification->category() << m_notification->summary() << m_notification->body() << m_notification->hintValue("x-nemo-hidden");
+    DEBUG() << m_notification->replacesId() << m_notification->category() << m_notification->summary() << m_notification->body();
 }
 
 void PersonalNotification::removeNotification()
@@ -268,12 +293,21 @@ QDateTime PersonalNotification::timestamp() const
 
 bool PersonalNotification::hidden() const
 {
-    return m_hidden;
+    // Deprecated but still needed for serialization compatibilty.
+    return false;
 }
 
-bool PersonalNotification::restored() const
+bool PersonalNotification::hasPhoneNumber() const
 {
-    return m_restored;
+    switch (m_eventType) {
+    case CommHistory::Event::SMSEvent:
+    case CommHistory::Event::MMSEvent:
+    case CommHistory::Event::CallEvent:
+    case VOICEMAIL_SMS_EVENT_TYPE:
+        return CommHistory::normalizePhoneNumber(m_remoteUid, true).length() > 0;
+    default:
+        return false;
+    }
 }
 
 void PersonalNotification::setRemoteUid(const QString& remoteUid)
@@ -356,12 +390,9 @@ void PersonalNotification::setSmsReplaceNumber(const QString &number)
     }
 }
 
-void PersonalNotification::setHidden(bool hide)
+void PersonalNotification::setHidden(bool)
 {
-    if (m_hidden != hide) {
-        m_hidden = hide;
-        setHasPendingEvents(true);
-    }
+    // Deprecated but still needed for serialization compatibilty.
 }
 
 const Recipient &PersonalNotification::recipient() const
@@ -388,11 +419,6 @@ QDataStream& operator<<(QDataStream &out, const RTComLogger::PersonalNotificatio
 QDataStream& operator>>(QDataStream &in, RTComLogger::PersonalNotification &key)
 {
     key.deSerialize(in, key);
-
-    // Hidden property is not in the serialization from earlier forms
-    if (!key.property("hidden").isValid()) {
-        key.setProperty("hidden", QVariant::fromValue(false));
-    }
 
     return in;
 }

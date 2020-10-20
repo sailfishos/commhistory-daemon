@@ -11,7 +11,7 @@ BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(Qt5Contacts)
 BuildRequires:  pkgconfig(Qt5Versit)
 BuildRequires:  pkgconfig(Qt5Test)
-BuildRequires:  pkgconfig(commhistory-qt5) >= 1.9.33
+BuildRequires:  pkgconfig(commhistory-qt5) >= 1.10.1.1
 BuildRequires:  pkgconfig(contactcache-qt5)
 BuildRequires:  pkgconfig(qtcontacts-sqlite-qt5-extensions)
 BuildRequires:  pkgconfig(TelepathyQt5)
@@ -20,16 +20,17 @@ BuildRequires:  pkgconfig(mlocale5)
 BuildRequires:  pkgconfig(mce)
 BuildRequires:  pkgconfig(ngf-qt5)
 BuildRequires:  pkgconfig(qt5-boostable)
-BuildRequires:  pkgconfig(nemonotifications-qt5) >= 1.0.5
+BuildRequires:  pkgconfig(nemonotifications-qt5) > 1.2.1
 BuildRequires:  qt5-qttools
 BuildRequires:  qt5-qttools-linguist
 BuildRequires:  libqofono-qt5-devel >= 0.89
 BuildRequires:  libqofonoext-devel
 BuildRequires:  python3-base
 BuildRequires:  systemd
-Requires:  libcommhistory-qt5 >= 1.9.33
+Requires:  libcommhistory-qt5 >= 1.10.1.1
 Requires:  libqofono-qt5 >= 0.66
 Requires:  mapplauncherd-qt5
+Requires:  nemo-qml-plugin-notifications-qt5 >= 1.2.1.1
 
 Obsoletes: smshistory <= 0.1.8
 Provides: smshistory > 0.1.8

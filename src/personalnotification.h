@@ -115,7 +115,8 @@ public:
     QString smsReplaceNumber() const;
     QDateTime timestamp() const;
     bool hidden() const;
-    bool restored() const;
+
+    bool hasPhoneNumber() const;
 
     void setRemoteUid(const QString& remoteUid);
     void setAccount(const QString& account);
