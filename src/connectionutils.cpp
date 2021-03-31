@@ -32,7 +32,7 @@ using namespace RTComLogger;
 
 ConnectionUtils::ConnectionUtils(QObject* parent) : QObject(parent)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     Tp::registerTypes();
 
@@ -55,9 +55,9 @@ Tp::AccountManagerPtr ConnectionUtils::accountManager() const
 
 void ConnectionUtils::prepareAccounts()
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(!m_AccountManager.isNull() && m_AccountManager->isReady()){
+    if (!m_AccountManager.isNull() && m_AccountManager->isReady()) {
         // connect to new account signals
         connect(m_AccountManager.data(),
                 SIGNAL(newAccount(const Tp::AccountPtr &)),
@@ -73,7 +73,7 @@ void ConnectionUtils::prepareAccounts()
 
 void ConnectionUtils::slotAccountManagerReady(Tp::PendingOperation *op)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     if (!op->isError() && m_AccountManager->isReady()) {
         prepareAccounts();
@@ -84,9 +84,9 @@ void ConnectionUtils::slotAccountManagerReady(Tp::PendingOperation *op)
 
 void ConnectionUtils::prepareAccount(const Tp::AccountPtr &account)
 {
-    if(!account.isNull() && account->isReady()) {
+    if (!account.isNull() && account->isReady()) {
         prepareConnection(account);
-    } else if(!account.isNull() && !account->isReady()) {
+    } else if (!account.isNull() && !account->isReady()) {
         Tp::PendingOperation* po = account->becomeReady();
         connect(po,
                 SIGNAL(finished(Tp::PendingOperation *)),
@@ -122,7 +122,7 @@ void ConnectionUtils::slotAccountValidityChanged(bool valid)
 
 void ConnectionUtils::slotAddAccount(const Tp::AccountPtr &account)
 {
-    if(!m_AccountManager.isNull()) {
+    if (!m_AccountManager.isNull()) {
         prepareAccount(account);
     }
 }
@@ -136,8 +136,8 @@ void ConnectionUtils::prepareConnection(const Tp::AccountPtr &account)
 
     Tp::ConnectionPtr connection = account->connection();
 
-    if(!connection.isNull()) {
-        DEBUG() << Q_FUNC_INFO << "Connection object exists";
+    if (!connection.isNull()) {
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection object exists";
         connect(connection->becomeReady(Tp::Connection::FeatureSimplePresence),
                 SIGNAL(finished(Tp::PendingOperation*)),
                 SLOT(slotConnectionReady(Tp::PendingOperation*)));
@@ -150,13 +150,13 @@ void ConnectionUtils::prepareConnection(const Tp::AccountPtr &account)
 
 void ConnectionUtils::slotConnectionChanged(const Tp::ConnectionPtr &connection)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     Tp::Account *account = qobject_cast<Tp::Account *>(sender());
 
-    if(account != 0 && account->isValid()) {
-        if(!connection.isNull()) {
-            DEBUG() << Q_FUNC_INFO << "Connection object exists";
+    if (account != 0 && account->isValid()) {
+        if (!connection.isNull()) {
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection object exists";
             connect(connection->becomeReady(Tp::Connection::FeatureSimplePresence),
                     SIGNAL(finished(Tp::PendingOperation*)),
                     SLOT(slotConnectionReady(Tp::PendingOperation*)));
@@ -166,11 +166,11 @@ void ConnectionUtils::slotConnectionChanged(const Tp::ConnectionPtr &connection)
 
 void ConnectionUtils::slotConnectionReady(Tp::PendingOperation* operation)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(operation && !operation->isError()) {
+    if (operation && !operation->isError()) {
         Tp::PendingReady *pr = qobject_cast<Tp::PendingReady*>(operation);
-        if(pr){
+        if (pr) {
             Tp::ConnectionPtr connection = Tp::ConnectionPtr::qObjectCast(pr->proxy());
 
             if (!connection.isNull() && connection->isValid()) {

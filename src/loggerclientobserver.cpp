@@ -51,13 +51,13 @@ void LoggerClientObserver::observeChannels(const Tp::MethodInvocationContextPtr<
     Q_UNUSED(observerInfo)
     Q_UNUSED(connection)
 
-    DEBUG() << "LoggerClientObserver::observeChannels";
+    qCDebug(lcCommhistoryd) << "LoggerClientObserver::observeChannels";
 
-    if(m_pLogger) {
+    if (m_pLogger) {
         foreach(Tp::ChannelPtr channel, channels) {
             QVariantMap properties = channel->immutableProperties();
             QString channelType = properties.value(TP_QT_IFACE_CHANNEL+QLatin1String(".ChannelType")).toString();
-            if( !channelType.isNull() && !channelType.isEmpty()) {
+            if (!channelType.isNull() && !channelType.isEmpty()) {
                 m_pLogger->createChannelListener(channelType, context, account, channel);
             }
         }

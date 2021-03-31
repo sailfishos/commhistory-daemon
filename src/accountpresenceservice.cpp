@@ -59,7 +59,7 @@ AccountPresenceService::AccountPresenceService(Tp::AccountManagerPtr manager, QO
     if (!QDBusConnection::sessionBus().registerObject(ACCOUNT_PRESENCE_OBJECT_PATH, this)) {
         qWarning() << "Object registration failed!";
     } else {
-        if(!QDBusConnection::sessionBus().registerService(ACCOUNT_PRESENCE_SERVICE_NAME)) {
+        if (!QDBusConnection::sessionBus().registerService(ACCOUNT_PRESENCE_SERVICE_NAME)) {
             qWarning() << "Unable to register account presence service!"
                        << QDBusConnection::sessionBus().lastError();
         } else {
@@ -69,7 +69,7 @@ AccountPresenceService::AccountPresenceService(Tp::AccountManagerPtr manager, QO
 
     if (!m_accountManager->isReady()) {
         // Wait for the account manager to become ready
-        DEBUG() << "Waiting for account manager to become ready";
+        qCDebug(lcCommhistoryd) << "Waiting for account manager to become ready";
         Tp::PendingReady *pr = m_accountManager->becomeReady(Tp::AccountManager::FeatureCore);
         Q_ASSERT(pr);
         connect(pr, SIGNAL(finished(Tp::PendingOperation *)),
@@ -138,7 +138,7 @@ void AccountPresenceService::setAccountPresenceWithMessage(const QString &accoun
 void AccountPresenceService::accountManagerReady(Tp::PendingOperation *)
 {
     if (m_accountManager->isReady()) {
-        DEBUG() << "Account manager is now ready";
+        qCDebug(lcCommhistoryd) << "Account manager is now ready";
 
         // Process any updates that were previously deferred
         if (m_globalUpdatePresent) {
