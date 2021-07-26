@@ -683,17 +683,21 @@ int MmsHandler::sendMessage(const QString &imsi, const QStringList &to, const QS
     event.setStatus(Event::SendingStatus);
     event.setIsRead(true);
 
+    // XXX Group conversations not yet supported, so we will send one message at a time
+    if (to.size() + cc.size() + bcc.size() > 1) {
+        QStringList recepients = to + cc + bcc;
+        int lastEventId = -1;
+        for (const QString &recepient : recepients) {
+            lastEventId = sendMessage(imsi, QStringList(recepient), {}, {}, subject, parts);
+        }
+        return lastEventId;
+    }
+
     event.setRecipients(Recipient(ringAccountPath, CommHistory::normalizePhoneNumber(to[0], false))); // XXX Wrong for group conversations!
     event.setToList(normalizeNumberList(to));
     event.setCcList(normalizeNumberList(cc));
     event.setBccList(normalizeNumberList(bcc));
     if (!imsi.isEmpty()) event.setSubscriberIdentity(imsi);
-
-    // XXX Group conversations not yet supported
-    if (to.size() + cc.size() + bcc.size() > 1) {
-        qCritical() << "Ignoring outgoing group MMS event; this is not yet implemented:" << event.toString();
-        return -1;
-    }
 
     if (!setGroupForEvent(event)) {
         qCritical() << "Failed to handle group for MMS send event; message dropped:" << event.toString();
