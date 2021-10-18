@@ -89,6 +89,7 @@ void NotificationManager::addModem(QString path)
 
     connect(mw, SIGNAL(voicemailWaitingChanged(bool)), SLOT(slotVoicemailWaitingChanged()));
     connect(mw, SIGNAL(voicemailMessageCountChanged(int)), SLOT(slotVoicemailWaitingChanged()));
+    connect(mw, SIGNAL(voicemailMailboxNumberChanged(const QString&)), SLOT(slotVoicemailWaitingChanged()));
     connect(mw, SIGNAL(validChanged(bool)), this, SLOT(slotValidChanged(bool)));
 
     if (mw->isValid()) {
@@ -909,7 +910,7 @@ void NotificationManager::slotVoicemailWaitingChanged()
             path = VOICECALL_OBJECT_PATH;
             iface = VOICECALL_INTERFACE;
             method = VOICECALL_DIAL_METHOD;
-            args.append(QVariant(QVariantList() << QString(QStringLiteral("tel://")) + voicemailNumber));
+            args.append(voicemailNumber);
         } else {
             service = CALL_HISTORY_SERVICE_NAME;
             path = CALL_HISTORY_OBJECT_PATH;
