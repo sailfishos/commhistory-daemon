@@ -249,26 +249,26 @@ void NotificationManager::showNotification(const CommHistory::Event& event,
         || event.type() == CommHistory::Event::MMSEvent
         || event.type() == CommHistory::Event::IMEvent)
     {
-        bool inboxObserved = CommHistoryService::instance()->inboxObserved();
-        if (inboxObserved || isCurrentlyObservedByUI(event, channelTargetId, chatType)) {
-            if (!m_ngfClient->isConnected())
-                m_ngfClient->connect();
+        bool observed = CommHistoryService::instance()->inboxObserved() || isCurrentlyObservedByUI(event, channelTargetId, chatType);
+        if (!m_ngfClient->isConnected())
+            m_ngfClient->connect();
 
-            if (!m_ngfEvent) {
-                QMap<QString, QVariant> properties;
+        if (!m_ngfEvent) {
+            QMap<QString, QVariant> properties;
+            if (observed)
                 properties.insert("play.mode", "foreground");
-                const QString *ngfEvent;
-                if (event.type() == CommHistory::Event::SMSEvent || event.type() == CommHistory::Event::MMSEvent) {
-                    ngfEvent = &NgfdEventSms;
-                } else {
-                    ngfEvent = &NgfdEventChat;
-                }
-                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "play ngf event: " << ngfEvent;
-                m_ngfEvent = m_ngfClient->play(*ngfEvent, properties);
+            const QString *ngfEvent;
+            if (event.type() == CommHistory::Event::SMSEvent || event.type() == CommHistory::Event::MMSEvent) {
+                ngfEvent = &NgfdEventSms;
+            } else {
+                ngfEvent = &NgfdEventChat;
             }
-
-            return;
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "play ngf event: " << ngfEvent;
+            m_ngfEvent = m_ngfClient->play(*ngfEvent, properties);
         }
+
+        if (observed)
+            return;
     }
 
     // try to update notifications for existing event
