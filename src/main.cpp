@@ -40,6 +40,7 @@
 #include "connectionutils.h"
 #include "accountoperationsobserver.h"
 #include "fscleanup.h"
+#include "voicecallfilterhandler.h"
 #include "mmshandler.h"
 #include "mmshandler_adaptor.h"
 #include "smartmessaging.h"
@@ -149,6 +150,9 @@ Q_DECL_EXPORT int main(int argc, char **argv)
                reviver,
                &app);
     qCDebug(lcCommhistoryd) << "Logger created";
+
+    new VoiceCallFilterHandler(&app);
+    qCDebug(lcCommhistoryd) << "VoiceCallFilterHandler created";
 
     NotificationManager::instance();
     qCDebug(lcCommhistoryd) << "NotificationManager created";

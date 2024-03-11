@@ -71,6 +71,7 @@ HEADERS += logger.h \
            accountpresenceservice.h \
            debug.h \
            fscleanup.h \
+           voicecallfilterhandler.h \
            mmshandler.h \
            mmspart.h \
            messagehandlerbase.h \
@@ -95,6 +96,7 @@ SOURCES += main.cpp \
            accountpresenceifadaptor.cpp \
            accountpresenceservice.cpp \
            fscleanup.cpp \
+           voicecallfilterhandler.cpp \
            mmshandler.cpp \
            mmspart.cpp \
            messagehandlerbase.cpp \
