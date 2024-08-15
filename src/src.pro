@@ -53,7 +53,6 @@ packagesExist(qt5-boostable) {
 HEADERS += logger.h \
            channellistener.h \
            textchannellistener.h \
-           streamchannellistener.h \
            loggerclientobserver.h \
            notificationmanager.h \
            serialisable.h \
@@ -80,7 +79,6 @@ SOURCES += main.cpp \
            logger.cpp \
            channellistener.cpp \
            textchannellistener.cpp \
-           streamchannellistener.cpp \
            loggerclientobserver.cpp \
            notificationmanager.cpp \
            serialisable.cpp \
