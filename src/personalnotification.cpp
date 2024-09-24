@@ -154,7 +154,7 @@ bool PersonalNotification::restore(Notification *n)
 {
     if (m_notification && m_notification != n) {
         delete m_notification;
-        m_notification = 0;
+        m_notification = nullptr;
     }
 
     // Support old style binary data, but use base64 normally
@@ -171,6 +171,8 @@ bool PersonalNotification::restore(Notification *n)
     if (stream.status())
         return false;
 
+    // we don't want pending changes from above deserialization of an existing notification
+    setHasPendingEvents(false);
     m_notification = n;
     m_recipient = Recipient(account(), remoteUid());
     connect(m_notification, SIGNAL(closed(uint)), SLOT(onClosed(uint)));
@@ -226,7 +228,8 @@ void PersonalNotification::publishNotification()
 
     setHasPendingEvents(false);
 
-    qCDebug(lcCommhistoryd) << m_notification->replacesId() << m_notification->category() << m_notification->summary() << m_notification->body();
+    qCDebug(lcCommhistoryd) << m_notification->replacesId() << m_notification->category()
+                            << m_notification->summary() << m_notification->body();
 }
 
 void PersonalNotification::removeNotification()
