@@ -1072,14 +1072,16 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
         break;
     }
     case Tp::DeliveryStatusRead: {
-        event.setStatus(CommHistory::Event::DeliveredStatus); // Message is read by recipient so it defenetelly delivered
+        // Message is read by recipient so it definitely delivered
+        event.setStatus(CommHistory::Event::DeliveredStatus);
         event.setStartTime(deliveryTime);
         event.setReadStatus(CommHistory::Event::ReadStatusRead);
 
         break;
     }
     case Tp::DeliveryStatusDeleted: {
-        event.setStatus(CommHistory::Event::DeliveredStatus); // Message is read by recipient so it defenetelly delivered
+        // Message is read by recipient so it definitely delivered
+        event.setStatus(CommHistory::Event::DeliveredStatus);
         event.setStartTime(deliveryTime);
         event.setReadStatus(CommHistory::Event::ReadStatusDeleted);
 
