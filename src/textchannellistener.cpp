@@ -418,17 +418,12 @@ int TextChannelListener::groupId()
             }
 
             if (!m_GroupModel->addGroup(group)) {
-
                 qCritical() << Q_FUNC_INFO << "error adding group";
-            }
-            else {
-
+            } else {
                 m_Group = group;
                 qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "added new group:" << m_Group.id();
             }
-        }
-        else {
-
+        } else {
             qWarning() << "Group id is requested in invalid state";
         }
     }
@@ -594,8 +589,6 @@ void TextChannelListener::handleMessages()
     QHash<int, QMultiHash<int, QString> > modifyTokens;
     bool hasReplaceMessage = false;
 
-    NotificationManager* nManager = NotificationManager::instance();
-
     Tp::TextChannelPtr textChannel = Tp::TextChannelPtr::dynamicCast(m_Channel);
     if (!textChannel) {
         qCritical() << "TextChannelListener has non text channel";
@@ -610,6 +603,8 @@ void TextChannelListener::handleMessages()
             m_pendingMessageIds.insertMulti(m_Channel->objectPath(), id);
         }
     }
+
+    NotificationManager* nManager = NotificationManager::instance();
 
     qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "Number of messages in local message queue: " << m_messageQueue.size();
 
@@ -1020,7 +1015,6 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
         }
     }
 
-
     if (!messageFound) {
         qWarning() << "[DELIVERY] Failed to fetch event by message token/id";
         return result;
@@ -1403,16 +1397,13 @@ void TextChannelListener::updateGroupChatName(ChangedChannelProperty changedChan
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "New group chat name is" << m_GroupChatName;
 
     if (m_Group.isValid()) {
-
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Current group chat name for this group is" << m_Group.chatName();
 
         if (m_GroupChatName != m_Group.chatName()) {
-
             qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "updating group chat name...";
             m_Group.setChatName(m_GroupChatName);
 
             if (m_GroupModel) {
-
                 // Group is already in the database
                 CommHistory::Group modGroup;
                 modGroup.setId(m_Group.id());
@@ -1449,7 +1440,6 @@ void TextChannelListener::updateGroupChatName(ChangedChannelProperty changedChan
 
                 // if remoteId is empty, then YOU changed the topic
                 if (remoteId.isEmpty()) {
-
                     // if new chat name is empty, then the topic was removed
                     if (m_GroupChatName.isEmpty())
                         messageText = txt_qtn_msg_group_chat_topic_cleared_user;
@@ -1460,7 +1450,6 @@ void TextChannelListener::updateGroupChatName(ChangedChannelProperty changedChan
                 }
                 // otherwise a remote party
                 else {
-
                     if (m_GroupChatName.isEmpty())
                         messageText = txt_qtn_msg_group_chat_topic_cleared(remoteId);
 
@@ -1486,10 +1475,9 @@ void TextChannelListener::sendGroupChatEvent(const QString &message)
     event.setEndTime( QDateTime::currentDateTime() );
     event.setIsRead( true );
 
-    if ( !eventModel().addEvent( event, true ) )
-    {
+    if (!eventModel().addEvent( event, true )) {
         qCDebug(lcCommhistoryd) << "*** Adding group chat event message to data model has been failed.";
-     }
+    }
 }
 
 void TextChannelListener::updateCurrentGroup(int start, int end, const QModelIndex &parent)

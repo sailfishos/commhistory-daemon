@@ -139,7 +139,7 @@ void NotificationManager::init()
     connect(service, SIGNAL(inboxObservedChanged(bool,QString)), SLOT(slotInboxObservedChanged()));
     connect(service, SIGNAL(callHistoryObservedChanged(bool)), SLOT(slotCallHistoryObservedChanged(bool)));
     connect(service, SIGNAL(observedConversationsChanged(QList<CommHistoryService::Conversation>)),
-                     SLOT(slotObservedConversationsChanged(QList<CommHistoryService::Conversation>)));
+            SLOT(slotObservedConversationsChanged(QList<CommHistoryService::Conversation>)));
 
     groupModel();
 
@@ -249,9 +249,8 @@ void NotificationManager::showNotification(const CommHistory::Event& event,
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << event.id() << channelTargetId << chatType;
 
     if (event.type() == CommHistory::Event::SMSEvent
-        || event.type() == CommHistory::Event::MMSEvent
-        || event.type() == CommHistory::Event::IMEvent)
-    {
+            || event.type() == CommHistory::Event::MMSEvent
+            || event.type() == CommHistory::Event::IMEvent) {
         bool inboxObserved = CommHistoryService::instance()->inboxObserved();
         if (inboxObserved || isCurrentlyObservedByUI(event, channelTargetId, chatType)) {
             if (!m_ngfClient->isConnected())
@@ -538,8 +537,7 @@ int NotificationManager::pendingEventCount()
 QString NotificationManager::notificationText(const CommHistory::Event& event, const QString &details)
 {
     QString text;
-    switch(event.type())
-    {
+    switch(event.type()) {
         case CommHistory::Event::IMEvent:
         case CommHistory::Event::SMSEvent:
         {
