@@ -90,17 +90,14 @@ void Logger::createChannelListener(const QString &channelType,
 
     qCDebug(lcCommhistoryd) << "creating listener for: " << channelObjectPath << " type " << channelType;
 
-    ChannelListener* listener = 0;
     if (channelType == QLatin1String(TP_QT_IFACE_CHANNEL_TYPE_TEXT)) {
-        listener = new TextChannelListener(account, channel, context, this);
+        ChannelListener *listener = new TextChannelListener(account, channel, context, this);
+
         connect(listener, SIGNAL(savingFailed(const Tp::ConnectionPtr&)),
                 m_Reviver, SLOT(checkConnection(const Tp::ConnectionPtr&)));
-    }
-
-    if (listener) {
         connect(listener, SIGNAL(channelClosed(ChannelListener *)),
                 this, SLOT(channelClosed(ChannelListener *)));
-        m_Channels.append( channelObjectPath );
+        m_Channels.append(channelObjectPath);
     }
 }
 
