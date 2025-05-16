@@ -31,19 +31,18 @@
 
 using namespace RTComLogger;
 
-AccountOperationsObserver::AccountOperationsObserver(Tp::AccountManagerPtr accountManager, QObject* parent) :
-    QObject(parent),
-    m_pGroupModel(0),
-    m_AccountManager(accountManager)
+AccountOperationsObserver::AccountOperationsObserver(Tp::AccountManagerPtr accountManager, QObject* parent)
+    : QObject(parent)
+    , m_pGroupModel(0)
+    , m_AccountManager(accountManager)
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "START";
 
     if (!m_AccountManager.isNull()) {
         if (!m_AccountManager->isReady()) {
             qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Account manager is not ready. Making it ready...";
-            connect(m_AccountManager->becomeReady(),
-                SIGNAL(finished(Tp::PendingOperation *)),
-                SLOT(slotAccountManagerReady(Tp::PendingOperation *)));
+            connect(m_AccountManager->becomeReady(), SIGNAL(finished(Tp::PendingOperation *)),
+                    SLOT(slotAccountManagerReady(Tp::PendingOperation *)));
         } else {
             qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Account manager is already ready.";
             connectToAccounts();
@@ -52,10 +51,8 @@ AccountOperationsObserver::AccountOperationsObserver(Tp::AccountManagerPtr accou
         qWarning() << "Account manager is null!";
     }
 
-    connect(this,
-            SIGNAL(removeAccountNotifications(QString)),
-            NotificationManager::instance(),
-            SLOT(removeNotifications(QString)),
+    connect(this, SIGNAL(removeAccountNotifications(QString)),
+            NotificationManager::instance(), SLOT(removeNotifications(QString)),
             Qt::UniqueConnection);
 
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "END";
@@ -66,13 +63,12 @@ void AccountOperationsObserver::connectToAccounts()
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "START";
 
     // First of all we must connect to listen removed()-signals of the accounts created in the future:
-    connect(m_AccountManager.data(),
-        SIGNAL(newAccount(const Tp::AccountPtr &)),
-        SLOT(slotConnectToSignals(const Tp::AccountPtr &)),
-        Qt::UniqueConnection);
+    connect(m_AccountManager.data(), SIGNAL(newAccount(const Tp::AccountPtr &)),
+            SLOT(slotConnectToSignals(const Tp::AccountPtr &)),
+            Qt::UniqueConnection);
 
     // Connect to listen removal of accounts that already exist:
-    foreach(const Tp::AccountPtr &account, m_AccountManager->allAccounts()) {
+    foreach (const Tp::AccountPtr &account, m_AccountManager->allAccounts()) {
         slotConnectToSignals(account);
     }
 
@@ -102,15 +98,12 @@ void AccountOperationsObserver::slotConnectToSignals(const Tp::AccountPtr &accou
     if (!account.isNull()) {
         m_accounts.insert(account->objectPath(), account);
 
-        connect(account.data(),
-                SIGNAL(removed()),
+        connect(account.data(), SIGNAL(removed()),
                 SLOT(slotAccountRemoved()),
                 Qt::UniqueConnection);
 
-        connect(account.data(),
-                SIGNAL(stateChanged(bool)),
-                this,
-                SLOT(slotAccountStateChanged(bool)),
+        connect(account.data(), SIGNAL(stateChanged(bool)),
+                this, SLOT(slotAccountStateChanged(bool)),
                 Qt::UniqueConnection);
     }
 
@@ -122,7 +115,6 @@ void AccountOperationsObserver::slotAccountStateChanged(bool isEnabled)
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << isEnabled;
 
     if (!isEnabled) {
-
         Tp::Account *account = qobject_cast<Tp::Account *>(sender());
         if (account)
             emit removeAccountNotifications(account->objectPath());
@@ -152,16 +144,12 @@ void AccountOperationsObserver::slotAccountRemoved()
                                    << CommHistory::Event::LocalUid);
         callModel->setFilterAccount(accountPath);
 
-        connect(callModel,
-                SIGNAL(modelReady(bool)),
-                this,
-                SLOT(slotDeleteCalls()),
+        connect(callModel, SIGNAL(modelReady(bool)),
+                this, SLOT(slotDeleteCalls()),
                 Qt::UniqueConnection);
 
-        connect(callModel,
-                SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
-                this,
-                SLOT(slotRowsRemoved(const QModelIndex&,int,int)),
+        connect(callModel, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
+                this, SLOT(slotRowsRemoved(const QModelIndex&,int,int)),
                 Qt::UniqueConnection);
 
         callModel->getEvents();
@@ -173,10 +161,8 @@ void AccountOperationsObserver::slotAccountRemoved()
         }
 
         if (m_pGroupModel && !m_pGroupModel->isReady()) {
-            connect(m_pGroupModel,
-                    SIGNAL(modelReady(bool)),
-                    this,
-                    SLOT(slotDeleteConversations()),
+            connect(m_pGroupModel, SIGNAL(modelReady(bool)),
+                    this, SLOT(slotDeleteConversations()),
                     Qt::UniqueConnection);
         } else {
             slotDeleteConversations();

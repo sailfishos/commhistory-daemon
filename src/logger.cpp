@@ -78,31 +78,26 @@ void Logger::createChannelListener(const QString &channelType,
 
     QString channelObjectPath = channel->objectPath();
 
-    if ( m_Channels.contains( channelObjectPath ) &&
-         !channelType.isEmpty() &&
-         !channelObjectPath.isEmpty() ) {
-         context->setFinishedWithError(QLatin1String(TP_QT_ERROR_INVALID_ARGUMENT), QString());
-         return;
+    if (m_Channels.contains(channelObjectPath)
+            && !channelType.isEmpty()
+            && !channelObjectPath.isEmpty()) {
+        context->setFinishedWithError(QLatin1String(TP_QT_ERROR_INVALID_ARGUMENT), QString());
+        return;
     }
 
-    connect(channel.data(),
-            SIGNAL( invalidated(Tp::DBusProxy*, const QString&, const QString& ) ),
-            this,
-            SLOT( slotInvalidated(Tp::DBusProxy*, const QString&, const QString& ) ) );
+    connect(channel.data(), SIGNAL(invalidated(Tp::DBusProxy*, const QString&, const QString&)),
+            this, SLOT(slotInvalidated(Tp::DBusProxy*, const QString&, const QString&)));
 
     qCDebug(lcCommhistoryd) << "creating listener for: " << channelObjectPath << " type " << channelType;
 
-    ChannelListener* listener = 0;
-    if (channelType == QLatin1String(TP_QT_IFACE_CHANNEL_TYPE_TEXT) ) {
-        listener = new TextChannelListener(account, channel, context, this);
+    if (channelType == QLatin1String(TP_QT_IFACE_CHANNEL_TYPE_TEXT)) {
+        ChannelListener *listener = new TextChannelListener(account, channel, context, this);
+
         connect(listener, SIGNAL(savingFailed(const Tp::ConnectionPtr&)),
                 m_Reviver, SLOT(checkConnection(const Tp::ConnectionPtr&)));
-    }
-
-    if (listener) {
         connect(listener, SIGNAL(channelClosed(ChannelListener *)),
                 this, SLOT(channelClosed(ChannelListener *)));
-        m_Channels.append( channelObjectPath );
+        m_Channels.append(channelObjectPath);
     }
 }
 
@@ -131,8 +126,6 @@ void Logger::slotInvalidated(Tp::DBusProxy *proxy,
         m_Channels.removeAll(channel->objectPath());
     }
 
-    disconnect(channel,
-            SIGNAL( invalidated(Tp::DBusProxy*, const QString&, const QString& ) ),
-            this,
-            SLOT( slotInvalidated(Tp::DBusProxy*, const QString&, const QString& ) ) );
+    disconnect(channel, SIGNAL(invalidated(Tp::DBusProxy*, const QString&, const QString&)),
+               this, SLOT(slotInvalidated(Tp::DBusProxy*, const QString&, const QString&)));
 }

@@ -63,7 +63,6 @@ class TextChannelListener : public ChannelListener
     Q_OBJECT
 
 public:
-
     TextChannelListener(const Tp::AccountPtr &account,
                         const Tp::ChannelPtr &channel,
                         const Tp::MethodInvocationContextPtr<> &context,
@@ -113,7 +112,6 @@ private Q_SLOTS:
     void slotConvEventsCommitted(const QList<CommHistory::Event> &events, bool success);
 
 private:
-
     enum ChangedChannelProperty {
         None,
         ChannelName,
@@ -179,7 +177,6 @@ private:
     CommHistory::ConversationModel& conversationModel();
 
 private:
-
     typedef QPair<QString,QString> Presence;
 
     // TODO: only for 1-1 chat, should be fixed later

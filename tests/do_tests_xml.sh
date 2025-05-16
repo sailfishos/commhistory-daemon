@@ -34,8 +34,10 @@ fi
 
 cat > ${TARGET_FILE} << EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
-    <testdefinition version="0.1">
+<testdefinition version="0.1">
     <suite name="${PROJECT_NAME}-tests">
+      <set name="commhistory-daemon-tests" feature="Commhistory daemon">
+      <description>Unit tests for commhistory daemon</description>
 EOF
 
 echo "Copying test_set.xml files from the following test folders $TEST_FOLDERS for target $TARGET_FILE"
@@ -53,6 +55,7 @@ do
 done
 
 cat >> ${TARGET_FILE} << EOF
+      </set>
     </suite>
 </testdefinition>
 

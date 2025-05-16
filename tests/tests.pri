@@ -21,7 +21,8 @@
 ###############################################################################
 
 !include( ../common-project-config.pri ) : error( "Unable to include common-project-config.pri!" )
-!include( ../common-vars.pri ) : error( "Unable to include common-vars.pri!" )
+
+PROJECT_NAME = commhistory-daemon
 
 DEFINES -= QT_NO_DEBUG QT_NO_DEBUG_OUTPUT QT_NO_WARNING_OUTPUT
 DEFINES += UNIT_TEST

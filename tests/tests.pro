@@ -20,7 +20,7 @@
 #
 ###############################################################################
 
-!include( ../common-vars.pri ):error( "Unable to install common-vars.pri" )
+PROJECT_NAME = commhistory-daemon
 
 TEMPLATE = subdirs
 SUBDIRS = ut_notificationmanager \
