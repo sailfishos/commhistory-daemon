@@ -23,5 +23,5 @@ src/TpExtensions/.gen/
 tests/bin/
 translations/telephony/telephony.qm
 translations/messaging/messaging.qm
-translations/commhistoryd.qm
+translations/commhistoryd*.qm
 translations/commhistoryd.ts

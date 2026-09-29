@@ -1039,19 +1039,16 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
     qCDebug(lcCommhistoryd) << "[DELIVERY] Message delivery status: " << deliveryStatus;
 
     switch (deliveryStatus) {
-    case Tp::DeliveryStatusDelivered: {
+    case Tp::DeliveryStatusDelivered:
         event.setStatus(CommHistory::Event::DeliveredStatus);
         event.setStartTime(deliveryTime);
-
         break;
-    }
-    case Tp::DeliveryStatusAccepted: {
+    case Tp::DeliveryStatusAccepted:
         event.setStatus(CommHistory::Event::SentStatus);
         event.setStartTime(deliveryTime);
         break;
-    }
     case Tp::DeliveryStatusTemporarilyFailed:
-    case Tp::DeliveryStatusPermanentlyFailed: {
+    case Tp::DeliveryStatusPermanentlyFailed:
         // If sending fails, event is marked as temporarily failed
         // If delivery fails, event is marked as permanently failed
         event.setStartTime(deliveryTime);
@@ -1064,29 +1061,27 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
         handleMessageFailed(message, event);
 
         break;
-    }
-    case Tp::DeliveryStatusRead: {
+    case Tp::DeliveryStatusRead:
         // Message is read by recipient so it definitely delivered
         event.setStatus(CommHistory::Event::DeliveredStatus);
         event.setStartTime(deliveryTime);
         event.setReadStatus(CommHistory::Event::ReadStatusRead);
 
         break;
-    }
-    case Tp::DeliveryStatusDeleted: {
+    case Tp::DeliveryStatusDeleted:
         // Message is read by recipient so it definitely delivered
         event.setStatus(CommHistory::Event::DeliveredStatus);
         event.setStartTime(deliveryTime);
         event.setReadStatus(CommHistory::Event::ReadStatusDeleted);
 
         break;
-    }
     default:
         // Unknown, cases are handled here.
         event.setStatus(CommHistory::Event::SendingStatus);
 
         break;
     }
+
     result = DeliveryHandlingResolved;
 
     return result;
@@ -1112,7 +1107,6 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
 
     // if the received message is a delivery report
     if (message.messageType() == Tp::ChannelTextMessageTypeDeliveryReport) {
-
         // see if the message is actually an error message
         Tp::MessagePart part = message.header();
         int status = part.value(DELIVERY_STATUS).variant().toInt();
@@ -1120,10 +1114,10 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
         QString dbusError = part.value(DELIVERY_DBUSERROR).variant().toString();
         QString errorMessage = part.value(DELIVERY_ERRORMESSAGE).variant().toString();
 
-        qCDebug(lcCommhistoryd) << "status:"        << status
-                 << "message token:" << messageToken
-                 << "dbus error:"    << dbusError
-                 << "error message:" << errorMessage;
+        qCDebug(lcCommhistoryd) << "status:" << status
+                                << "message token:" << messageToken
+                                << "dbus error:" << dbusError
+                                << "error message:" << errorMessage;
 
         // dont show notes for perm. failed mms messages
         if (event.type() == CommHistory::Event::MMSEvent
@@ -1131,13 +1125,13 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
             return;
         }
 
-        if (status == Tp::DeliveryStatusTemporarilyFailed ||
-            status == Tp::DeliveryStatusPermanentlyFailed) {
-
+        if (status == Tp::DeliveryStatusTemporarilyFailed
+            || status == Tp::DeliveryStatusPermanentlyFailed) {
             QString recipient;
-            if (!event.contactName().isEmpty()) {
+
+            if (!event.recipients().value(0).contactName().isEmpty()) {
                 // resolved name
-                recipient = event.contactName();
+                recipient = event.recipients().value(0).contactName();
             } else if (CommHistory::localUidComparesPhoneNumbers(event.localUid())) {
                 // phone number
                 ML10N::MLocale locale;
@@ -1154,28 +1148,22 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
             QString category = StrongErrorCategory;
 
             // check for specific error:
-            // missing smsc
             if (dbusError == MODEM_ERROR_SMSC_ADDRESS_NOT_AVAILABLE) {
-
+                // missing smsc
                 errorMsgToUser = txt_qtn_msg_error_missing_smsc;
                 category = ErrorCategory;
-            }
-            // fdn error
-            else if (dbusError == MODEM_ERROR_DESTINATION_ADDRESS_FDN_RESTRICTED ||
-                     dbusError == MODEM_ERROR_SMS_ADDRESS_FDN_RESTRICTED) {
-
+            } else if (dbusError == MODEM_ERROR_DESTINATION_ADDRESS_FDN_RESTRICTED
+                       || dbusError == MODEM_ERROR_SMS_ADDRESS_FDN_RESTRICTED) {
+                // fdn error
                 errorMsgToUser = txt_qtn_re_error_denied_phone_number(recipient);
                 category = ErrorCategory;
-            }
-            // offline chatting
-            else if (event.type() == CommHistory::Event::IMEvent
-                     && areRemotePartiesOffline()) {
-
+            } else if (event.type() == CommHistory::Event::IMEvent
+                       && areRemotePartiesOffline()) {
+                // offline chatting
                 errorMsgToUser = txt_qtn_msg_general_does_not_support_offline;
                 category = ErrorCategory;
-            }
-            // IM message error
-            else if (event.type() == CommHistory::Event::IMEvent) {
+            } else if (event.type() == CommHistory::Event::IMEvent) {
+                // IM message error
                 errorMsgToUser = txt_qtn_msg_error_sending_failed(recipient);
                 category = ErrorCategory;
             }
