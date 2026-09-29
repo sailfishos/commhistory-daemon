@@ -31,16 +31,14 @@
 INSTALL_PREFIX = /usr  # default installation prefix
 
 # default prefix can be overriden by defining PREFIX when running qmake
-!isEmpty( PREFIX ) {
+!isEmpty(PREFIX) {
     INSTALL_PREFIX = $${PREFIX}
-    message("==== install prefix set to `$${INSTALL_PREFIX}'")
 }
-
 
 #-----------------------------------------------------------------------------
 # default installation target for applications
 #-----------------------------------------------------------------------------
-contains( TEMPLATE, app ) {
+contains(TEMPLATE, app) {
     target.path  = $${INSTALL_PREFIX}/bin
     INSTALLS    += target
 }
@@ -48,11 +46,9 @@ contains( TEMPLATE, app ) {
 #-----------------------------------------------------------------------------
 # default installation target for libraries
 #-----------------------------------------------------------------------------
-contains( TEMPLATE, lib ) {
-
+contains(TEMPLATE, lib) {
     target.path  = $$[QT_INSTALL_LIBS]
     INSTALLS    += target
-
 
     #-------------------------------------------------------------------------
     # target for pkg-config file
@@ -63,17 +59,13 @@ contains( TEMPLATE, lib ) {
     INSTALLS        += pkgconfig
 
     # reset the .pc file's `prefix' variable
-    include( tools/fix-pc-prefix.pri )
-
+    include(tools/fix-pc-prefix.pri)
 }
 
 #-----------------------------------------------------------------------------
 # target for header files
 #-----------------------------------------------------------------------------
-!isEmpty( headers.files ) {
+!isEmpty(headers.files) {
     headers.path  = $${INSTALL_PREFIX}/include/$${TARGET}
     INSTALLS     += headers
 }
-
-
-# End of File

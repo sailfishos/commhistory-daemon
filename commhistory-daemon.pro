@@ -22,6 +22,5 @@
 
 TEMPLATE  = subdirs
 SUBDIRS   = src data tests translations
-OTHER_FILES += rpm/commhistory-daemon.spec
 
-# End of File
+OTHER_FILES += rpm/commhistory-daemon.spec
