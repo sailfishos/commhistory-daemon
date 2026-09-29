@@ -1135,9 +1135,10 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
             status == Tp::DeliveryStatusPermanentlyFailed) {
 
             QString recipient;
-            if (!event.contactName().isEmpty()) {
+
+            if (!event.recipients().value(0).contactName().isEmpty()) {
                 // resolved name
-                recipient = event.contactName();
+                recipient = event.recipients().value(0).contactName();
             } else if (CommHistory::localUidComparesPhoneNumbers(event.localUid())) {
                 // phone number
                 ML10N::MLocale locale;
