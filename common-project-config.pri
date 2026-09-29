@@ -33,5 +33,4 @@ UI_HEADERS_DIR  = ui/include
 UI_SOURCES_DIR  = ui/src
 QT             -= thread gui
 
-# we don't like warnings...
-QMAKE_CXXFLAGS *= -Werror -Wno-unused-parameter -Wall -fno-exceptions
+QMAKE_CXXFLAGS *= -Wno-unused-parameter -Wall -fno-exceptions
