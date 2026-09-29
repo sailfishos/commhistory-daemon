@@ -281,8 +281,8 @@ void NotificationManager::showNotification(const CommHistory::Event& event,
 
     // Get MUC topic from group
     QString chatName;
-    if (m_GroupModel && (chatType == CommHistory::Group::ChatTypeUnnamed ||
-        chatType == CommHistory::Group::ChatTypeRoom)) {
+    if (m_GroupModel && (chatType == CommHistory::Group::ChatTypeUnnamed
+                         || chatType == CommHistory::Group::ChatTypeRoom)) {
         for (int i = 0; i < m_GroupModel->rowCount(); i++) {
             QModelIndex row = m_GroupModel->index(i, 0);
             CommHistory::Group group = m_GroupModel->group(row);
